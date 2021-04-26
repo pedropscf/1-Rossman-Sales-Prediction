@@ -10,12 +10,12 @@ class Rossman(object):
     
     def __init__(self):
         
-        self.home_path = '/home/pedro/Documentos/repositories/1-Rossman-Sales-Prediction'
+        self.home_path = '/home/pedro/Documentos/repositories/1-Rossman-Sales-Prediction/'
         self.competition_distance_scaler = pickle.load(open(self.home_path + 'parameters/competition_distance_scaler.pkl','rb'))
         self.time_month_scaler           = pickle.load(open(self.home_path + 'parameters/time_month_scaler.pkl','rb'))
         self.year_scaler                 = pickle.load(open(self.home_path + 'parameters/year_scaler.pkl','rb'))
         self.promo_time_week_scaler      = pickle.load(open(self.home_path + 'parameters/promo_time_week_scaler.pkl','rb'))
-        self_encoding_store_type         = pickle.load(open(self.home_path + 'parameters/enconding_store_type.pkl','rb'))        
+        self.encoding_store_type         = pickle.load(open(self.home_path + 'parameters/enconding_store_type.pkl','rb'))        
 
             
     def data_cleaning(self,df1):
@@ -194,8 +194,7 @@ class Rossman(object):
 
 
         # store type - Label Encoder
-        le = LabelEncoder()
-        df5['store_type'] = self_encoding_store_type.fit_transform(df5['store_type'])
+        df5['store_type'] = self.encoding_store_type.fit_transform(df5['store_type'])
 
 
         # assortment - Ordinal Encoder
