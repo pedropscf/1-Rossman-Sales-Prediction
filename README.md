@@ -1,109 +1,96 @@
 
-# Detecting high value customers in a E-commerce platform
+# Previsão de vendas nas lojas da Rossman ao longo das próximas 6 semanas
 
-The All-In-One company is a fictitious E-commerce company that needs a solution to fidelize high value customers in its platform,
-trough a program of benefits called **Insiders**. Customers in this group will have especial promotions and, more dedicated team to
-focus on their support and customer experience.
-However, the company does not know the best way to categorize those customers and they need the answer of the following questions: 
-- **Who are my high value customers?**
-- **What are their characteristcs?**
-- **When a customer enters or leaves the program?**
+A Rossman é uma empresa do farmacêutico e contém mais de 3000 lojas espalhadas ao longo de 7 países diferentes da Europa. A empresa apresentou um desafio na plataforma Kaggle relacionado à dificuldade que a empresa possui em realizar previsões de vendas. Isso ocorre devido ao fato de que há milhares de gerentes locais que possuem metodologias próprias de previsão. Além disso, há outros fatores que podem não estar sendo utilizados nas previsões destes gerentes, como inflluência de feriados e sazonalidade.
 
+Com isso, a empresa precisa de uma solução que seja capaz de prever as vendas ao longo das próximas 6 semanas de cada uma das lojas. Portanto, a principal pergunta para o problema é:
+
+- **Qual será o total de vendas realizado pela loja X ao longo das próximas 6 semanas?**
 
 ## Features
 
-To answer this questions, the company sended a dataset with purchases and devolutions of different customers over the last year. The dataset contains over 500,000 and the following features:
+Para responder ao desafio levantado pela empresa, ela disponibilizou um conjunto de dados contendo vendas diárias em cada uma das lojas, além de informações acerca do tipo de loja, variedade de produtos e se a loja apresenta uma promoção ativa na data. De forma geral, as features no conjunto de dados foram:
 
-| Feature  | Description |
+| Feature  | Descrição |
 | ------------- | ------------- |
-| CustomerID  | Unique customer identifier |
-| InvoiceNo  | Unique invoice identifier  |
-| StockCode  | Unique product identifier  |
-| InvoiceDate | Date when the invoice was created |
-| Quantity | Number of products with same StockCode were in a InvoiceID |
-| UnitPrice | Price o an unit of the StockCode |
-| Country | Country of the customer |
+| store  | Número da loja |
+| day_of_week  | Dia da semana  |
+| date  | Data das vendas  |
+| sales | Valor total vendido pela loja na data |
+| customers | Número de clientes que passaram pela loja |
+| open | Se a loja estava aberta na data |
+| promo | Se a loja apresenta promoções |
+| state_holiday | Feriados nacionais |
+| school_holiday | Feriados escolares |
+| store_type | Tipo da loja |
+| assortment | Variedade de produtos disponíveis |
 
+Além das features anteriores, há ainda features relacionadas a distância e idade de competidores próximos e sobre promoções estendidas.
 
-## Solution
+## Solução
 
-The problem was classified as a classical non-supervised machine learning problem involving
-the clusterization (or categorization) of different customers by their similarities. The solution
-was develop **in cycles**, making possible to make incremental improvements on the solution over the time. It can be summarized in the steps below:
+O problema foi classificado como um problema clássico de regressão usando aprendizado de máquina em séries temporais. A solução foi realizada em ciclos de desenvolvimento de ponta a ponta e pode ser descrita resumidamente (a solução completa junto com os códigos desenvolvidos pode ser vista [aqui.](https://github.com/pedropscf/1-Rossman-Sales-Prediction/blob/7e3111cdad78d7373659ab99296c9290d8afb02d/m05_vid01_store_sales_prediction_PTBR.ipynb)) em:
 
-### Data cleaning and manipulation
+### Limpeza e manipulação dos dados
 
-The dataset was initially treated in order to create a dataset based RFM model (Recency, Frequency and Monetary),
-so the InvoiceNo was grouped, by summing the total value in it. Then the Customer ID was grouped and the InvoicesNo counted. Also
-the InvoiceDate was treated in order to create recency-based features.
-
-The first insight for the company was found at this point a very high number of InvoiceNo had no CustomerID, which lead to dropping around 20% of the dataset. **INSIGHT: The company should encourage customers in having a account on the E-commerce platform.**
+O conjunto de dados contém mais de 1 milhão de linhas e 18 colunas e o trabalho inicialmente realizado foi para a adequação dos tipos de dados no dataframe, seguido pelo tratamento dos valores nulos existentes para as features relacionados aos competidores e promoções estendidas.
 
 ### Feature Engineering
 
-At this point, many features were created and tested in different solution cycles, by evaluating the gain of information by adding or not a new feature to the clusterization process. But mostly, the features were created based on recency, frequency or monetary ideas.
+Aqui, as principais features criadas foram derivadas da data, como o número da semana no ano, o mês e o ano. Devido ao alto número de valores nulos para os atributos de promoções estendidas, foram criadas features mesclando informações sobre promoções e promoções estendidas.
 
-### Exploratory data analysis
+### Análise Exploratória de Dados (EDA)
 
-The initial EDA had the main objective of searching for outlier customers, on the different distributions of the features and their relation (and correlation). The pandas-profilling report (**INSERT THE LINK HERE**) were used to speed up the process and
-for the relation between variables, the pairplot of the most informational features were used to understand the relation between features.
+Na análise exploratória de dados foi realizada uma análise para a distribuição de cada uma das variáveis, as relações entre variáveis a partir de uma análise bivariada, matriz de correlações entre variáveis numéricas e correlações entre variáveis categóricas. Também foram realizadas análises acerca do comportamento da variável resposta (sales) para as diferentes variáveis categóricas, como tipo de loja e variedade de produtos.
 
-### Feature selection, transformation and embedding space
+Por fim, foram levantadas uma śerie de afirmações acerca do que se espera para as vendas de uma loja e algumas delas foram testadas, ajudando a trazer insights para a modelagem do problema.
 
-Before going to the training step of the clustering, the features were selected during different cycles of solutions and rescaled. Then, one copy of rescaled data were created and 
-other copies followed for the embedding process. With this, the clustering training process had been done both in rescaled space with the original features and in embedded spaces. The embedded spaces tested were:
+### Seleção de features e transformação
 
-- **PCA;**
-- **UMAP;**
-- **T-SNE;**
-- **Training a RandomForest regressor on the purchases feature, then embedding the estimators with UMAP.**
+Inicialmente, todas as features sofreram algum tipo de transformação:
 
-(**INSERIR FIGURAS DOS DIFERENTES ESPAÇOS DE EMBEDDING**)
+- Logarítmica: a feature alvo, sales, sofreu transformação logarítimica com o objetivo de tornar a curva mais próxima de uma curva normal.
+- Rescala: outras features foram aplicados os métodos de RobustScaler e MinMaxScaler, como o ano e a distância até o competidor.
+- Natureza: features mais relacionadas à data, como o número da semana, mês-ano, sofreu uma transformação de natureza ao serem divididas em uma parcela cosseno e outra parcela seno, com o objetivo de manter a ideia de ciclicidade destas variáveis
+- Normalização: nenhuma feature foi normalizada.
 
-### Clustering with different models (K-Means, GMM and Hierarchical) on both embedded space and original space
+Com todas as features devidamente transformadas e rescaladas, utilizou-se um regressor de Random Forest e o algoritmo Boruta sobre os dados com o objetivo de extrair informações acerca de quais são as features ou combinações delas que mais trazem informação à tarefa de regressão. Com isso, é possível decidir quais features seguirão para o treinamento e quais serão removidas.
 
-With the data cleaned, features created, selected and rescaled and different embedded spaces, the clustering process began with 3 different models: K-Means, Gaussian Mixture Model and Hierarchical.
-The training was done for different values of the main clustering hyperparameter, **the number of clusters, k**. The values tested were: 2, 3, 4, 5, 6, 8, 10, 12, 14, 16 and 20.
+### Treinamento dos modelos e validação cruzada ao longo do tempo
 
-The metric used to compare the performance of different models were the **silhouette score**. The model chosen were the Gaussian Mixture Model with 8 clusters, despite the fact that 6 clusters had a better metric,
-it did not clusterized very well the high value customers (the cluster with highest monetary score, had almost 34% of all customers). So, **the choice to increase the number of clusters was made to better clusterize 
-customers with better monetary score, going from 34% of the dataset to around 15%.**
+A partir das features selecionadas foram treinados diferentes modelos de regressores sobre os dados, como regressão linear, regressão linear regulzarizada, random forest regressor e o XGBoost. Inicialmente, foi realizado um treinamento sobre todos os dados de treinamento, seguindo pela avaliação dos modelos com o conjunto de testes, salvando-se métricas de erro como: erro médio absoluto percentual e erro médio quadrático. Em seguida, foi realizado um treinamento dos modelos em uma valização cruzada ao longo do tempo, dividido em 5 intervalos. As métricas de erro para cada intervalo foram salvas.
 
-(**INSERIR FIGURAS DOS RESULTADOS DE TREINAMENTO**)
+Com isso, observou-se que os modelos baseados em regressão linear apresentavam erros muitos altos, da ordem de um modelo simples de média, indicando que estes modelos não estariam ou aprendendo os dados, ou seriam incapazes de capturar bem o fenômeno. O que faz sentido, uma vez que foram observadas relações não lineares entre diferentes variáveis. Os modelos de Random Forest ou XGBoost apresentam métricas muito melhores, sendo o modelo escolhido o XGBoost.
 
+### Análise da performance do modelo
 
-### Cluster analysis for insights (EDA)
+Finalmente, com o modelo treinado, tunado, pode-se responder à pergunta levantada pela empresa:
 
-Finally, with the results from the clustering process, another EDA was made in order to extract insights from the different clusters. Also, at this moment the business questions will be answered.
+- **Qual será o total de vendas realizado pela loja X ao longo das próximas 6 semanas?** O modelo foi colocado em produção a partir do ambiente de Cloud do Heroku, além da criação de um bot do Telegram que é capaz de responder a pergunta para cada uma das lojas disponíveis para o treinamento. O robô pode ser acessado a partir [deste canal do Telegram](https://t.me/pedropscf_RossmanBot). Com isso, é possível consultar, a qualquer momento, a previsão de vendas de cada uma das lojas  através de uma metodologia única.
 
-- **Who are my high value customers?** Now, the company has a list of the 711 CustomerID's (~15%) of the customers able to enter the Insiders program.
+- Outros pontos a serem observados, considerando a métrica do erro percentual médio absoluto, é possível obter valores para um range estimado para a previsão de vendas para o próximo período (neste caso, 6 semanas). Com isso, o **valor previsto de vendas para todas as lojas foi de aproximadamente $279 milhões**, com o pior cenário de vendas para $240 milhões e o melhor cenário de vendas aproximadamente a $317 milhões.
 
-- **What are their characteristcs?** The average Insider customer has more than 10 orders in the platform, buys more than 500 itens per invoice, spends more than $7000 in each purchase buys products with a higher ticket, with the average unit price for a Insider being $13.01, while a non-Insider customer is $8.48.
+<p align="center">
+  <img src="https://github.com/pedropscf/1-Rossman-Sales-Prediction/blob/7e3111cdad78d7373659ab99296c9290d8afb02d/img/model_results.png" />
+</p>
 
-- **When a customer enters or leaves the program?** The main features to differentiate a Insider from a non-Insider is: quantity of products bought, total purchase value and more importantly recency of last purchase and time between purchases. **If a customer takes longer than 20 days to make a purchase, or time between purchases goes higher than 5 days and invoice values goes below $2500, the customer is not a Insiders anymore.**
+- Ao observar os resultados do modelo e previsão e seus respectivos erros, observa-se que o modelo apresenta uma pequena tendência em prever valores de vendas menores que o realizado (conforme verifica-se o skewness do erro tendendo para o lado negativo), dessa forma há um certo nível de conservadorismo pelas respostas apresentadas.
 
-- Insiders customers represents more than **60%** of the total purchases and more than **40%** of the total itens bought over the last year. Also, the median purchased value of a Insider is more than 3 times the value of a non-Insider customer.
-
-- Other **insights** were extract from the cluster data analysis in order to help the marketing team, by giving the CustomersID of customers in different clusters, so they can:
-    - To bring back churned clients, who did not buy a single product over the last year;
-    - **Clients that might be churning, with the last purchase going above 150 days**
-    - **Creating campaigns directed to different types of customers, based on the clusters results, in order to move them towards the Insiders program.**
-## Technologies used
+## Ferramentas utilizadas
 
 **Data manipulation and cleaning:** pandas, numpy
 
-**Data visualization:** matplotlib, seaborn and pandas profiling
+**Data visualization:** matplotlib, seaborn
 
-**Machine learning:** Clustering (scikit-learn and scipy), Embedded spaces (umap-learn)
+**Machine learning:** Regressão (scikit-learn e xgboost), selação de features (Boruta)
 
-**Database:** Creating tables and inserting data (sqlalchemy)
-
-
-## About Me
-I am data science enthusiast, learning new applications of Machine Learning, AI and Data Science in general to solve a diverse range of business problems.
+**Ambiente Cloud:** Flask, requests, desenho de API e Heroku
 
 
-## Authors
+## Sobre mim
+Entusiasta de ciência de dados, aprendendo sobre aplicações de Machine Learning, IA e Ciência de dados em geral para a solução de diversos problemas de negócios.
+
+## Autor
 
 - Pedro Fernandes [@pedropscf](https://www.github.com/pedropscf)
 
