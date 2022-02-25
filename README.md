@@ -1,4 +1,6 @@
 
+### :pushpin: [__Read in English__](https://github.com/pedropscf/1-Rossman-Sales-Prediction/blob/9f5a47b70bb4d2f06bd1a78f84ba686b570431f4/README-en.md)
+
 # Previsão de vendas nas lojas da Rossman ao longo das próximas 6 semanas
 
 A Rossman é uma empresa do farmacêutico e contém mais de 3000 lojas espalhadas ao longo de 7 países diferentes da Europa. A empresa apresentou um desafio na plataforma Kaggle relacionado à dificuldade que a empresa possui em realizar previsões de vendas. Isso ocorre devido ao fato de que há milhares de gerentes locais que possuem metodologias próprias de previsão. Além disso, há outros fatores que podem não estar sendo utilizados nas previsões destes gerentes, como inflluência de feriados e sazonalidade.
