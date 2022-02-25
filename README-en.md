@@ -85,7 +85,7 @@ Finally, after the model has been trained and tuned, the company's question can 
 
 **Data visualization:** matplotlib, seaborn
 
-**Machine learning:** Regressão (scikit-learn e xgboost), selação de features (Boruta)
+**Machine learning:** Regression models (scikit-learn e xgboost), feature selection (Boruta)
 
 **Cloud environment:** Flask, requests, desenho de API e Heroku
 
